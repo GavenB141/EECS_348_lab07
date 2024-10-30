@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <stdexcept>
 #include <vector>
 
 using namespace std;
@@ -61,6 +62,7 @@ void print_matrix(const Matrix &matrix_1, const Matrix &matrix_2) {
             cout << "|" << endl;
         }
     }
+    cout << endl;
 }
 
 Matrix operator+(Matrix matrix_1, Matrix matrix_2) {
@@ -78,15 +80,51 @@ Matrix operator+(Matrix matrix_1, Matrix matrix_2) {
 }
 
 Matrix operator*(Matrix matrix_1, Matrix matrix_2) {
-    // TODO
+    if (matrix_1[0].size() != matrix_2.size()) {
+        throw runtime_error("tried to multiply matrices of incompatible sizes");
+    }
+    int shared = matrix_2.size();
+    int rows = matrix_1.size();
+    int columns = matrix_2[0].size();
+    Matrix product = vector<vector<double>>(rows, vector<double>(columns));
+    
+    for (int y = 0; y < rows; y++) {
+        for (int x = 0; x < columns; x++) {
+            double sum = 0;
+            for (int i = 0; i < shared; i++) {
+                sum += matrix_1[y][i] * matrix_2[i][x];
+            }
+            product[y][x] = sum;
+        }
+    }
+
+    return product;
 }
 
 void get_diagonal_sum(const Matrix &matrix) {
-    // TODO
+    int rows = matrix.size();
+    int xp = 0, xs = matrix[0].size() - 1;
+    double primary = 0, secondary = 0;
+    for (int y = 0; y < rows && xs >= 0; y++, xp++, xs--) {
+        primary += matrix[y][xp];
+        secondary += matrix[y][xs];
+    }
+    cout << "Primary: " << primary << endl;
+    cout << "Secondary: " << secondary << endl << endl;
 }
 
 void swap_matrix_row(Matrix matrix, int row1, int row2) {
-    // TODO
+    int rows = matrix.size();
+    if (row1 >= rows || row2 >= rows) {
+        cout << "cannot swap rows " << row1 << " and " << row2 << ": invalid index" << endl;
+        return;
+    }
+
+    vector<double> temp = matrix[row1];
+    matrix[row1] = matrix[row2];
+    matrix[row2] = temp;
+
+    print_matrix(matrix);
 }
 
 int main(int argc, char *argv[]) {
@@ -98,16 +136,15 @@ int main(int argc, char *argv[]) {
     auto add_matrix = matrix_1 + matrix_2;
     cout << "operator+ overloading" << endl;
     print_matrix(add_matrix);
-    return 0;
 
     auto multiply_matrix = matrix_1 * matrix_2;
     cout << "operator* overloading" << endl;
     print_matrix(multiply_matrix);
 
-    cout << "get matrix diagonal sum" << endl;
+    cout << "get matrix diagonal sums of matrix 1" << endl;
     get_diagonal_sum(matrix_1);
 
-    cout << "swap matrix rows" << endl;
+    cout << "swap rows of matrix 1" << endl;
     swap_matrix_row(matrix_1, 0, 1);
     swap_matrix_row(matrix_1, 0, 100);
 }
